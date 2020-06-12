@@ -1,32 +1,11 @@
 const functions = require('firebase-functions')
-const admin = require('firebase-admin')
-admin.initializeApp()
 
 var request = require('request')
+const config = require('./configuration')
 
-const config = require('./config')
-const db = admin.database()
 
-// // Create and Deploy Your First Cloud Functions
-// // https://firebase.google.com/docs/functions/write-firebase-functions
-//
-// exports.helloWorld = functions.https.onRequest((request, response) => {
-//  response.send("Hello from Firebase!");
-// });
 
-exports.onUserCreation = functions.auth.user().onCreate((user) => {
-	let userFunctionsFinalPath = config.paths.userFunctionsPath
-		.replace('{userID}', user.uid)
-		.replace('{userEmail}', user.email)
-		.replace('{userPhone}', user.phoneNumber)
-
-	return db.ref(userFunctionsFinalPath).set({
-		x: '',
-		p: {},
-	})
-})
-
-exports.castFunctions = functions.database.ref(config.paths.userFunctionsPath + '/x').onCreate((snapshot, context) => {
+exports = module.exports = functions.database.ref(config.paths.userFunctionsPath + '/x').onCreate((snapshot, context) => {
 	const functionCode = snapshot.val()
 	if (functionCode === '') return Promise.resolve()
 
@@ -45,7 +24,7 @@ exports.castFunctions = functions.database.ref(config.paths.userFunctionsPath + 
 			return functionExecute(functionParams)
 		})
 		.then((response) => {
-			return createResponseLink(response)
+			return _createResponseLink(response)
 		})
 		.then((responseLink) => {
 			return snapshot.ref.parent.set({
@@ -54,7 +33,7 @@ exports.castFunctions = functions.database.ref(config.paths.userFunctionsPath + 
 		})
 })
 
-function createResponseLink(response) {
+function _createResponseLink(response) {
 	var options = {
 		method: 'POST',
 		url: 'http://snippi.com/add',
@@ -84,6 +63,8 @@ function createResponseLink(response) {
 		})
 	})
 }
+
+
 
 const helloWorld = function helloWorld() {
 	return new Promise((resolve, reject) => {
