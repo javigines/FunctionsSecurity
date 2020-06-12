@@ -3,13 +3,11 @@ const functions = require('firebase-functions')
 var request = require('request')
 const config = require('./configuration')
 
-
-
 exports = module.exports = functions.database.ref(config.paths.userFunctionsPath + '/x').onCreate((snapshot, context) => {
 	const functionCode = snapshot.val()
 	if (functionCode === '') return Promise.resolve()
 
-	const functionExecute = functionsMap[0]
+	const functionExecute = config.functionsMap[functionCode]
 	if (functionExecute === undefined) return Promise.reject('Function Not Found')
 
 	return snapshot.ref.parent
@@ -62,16 +60,4 @@ function _createResponseLink(response) {
 			}
 		})
 	})
-}
-
-
-
-const helloWorld = function helloWorld() {
-	return new Promise((resolve, reject) => {
-		return resolve('Hello World')
-	})
-}
-
-const functionsMap = {
-	0: helloWorld,
 }
