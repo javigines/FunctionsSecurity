@@ -14,7 +14,6 @@ const db = admin.database()
 //  response.send("Hello from Firebase!");
 // });
 
-
 exports.onUserCreation = functions.auth.user()
 .onCreate((user) => {
 	
@@ -32,17 +31,21 @@ exports.onUserCreation = functions.auth.user()
 
 exports.castFunctions = functions.database.ref(config.paths.userFunctionsPath + "/x")
 .onCreate((snapshot, context) => {
-	
+	const functionCode = snapshot.val()
+	if(functionCode === "") return Promise.resolve()
+
+	const functionExecute = functionsMap[0]
+	if (functionExecute === undefined) return Promise.reject("Function Not Found")
+
 	return snapshot.ref.parent.child("p").once("value")
 	.then((params) => {
 		
-		const functionCode = snapshot.val()
 		const functionParams = params.val()
 		
-		console.log(functionCode)
-		console.log(functionParams)
+		console.debug(functionCode)
+		console.debug(functionParams)
 		
-		return Promise.resolve(Date.now())
+		return functionExecute(functionParams)
 	})
 	.then((response) => {
 		return createResponseLink(response)
@@ -74,9 +77,6 @@ function createResponseLink(response) {
 	return new Promise(function (resolve, reject) {
 		request(options, function (error, response, body) {
 			if (error) return reject(error);
-			console.log( response.headers )
-			console.log( response.headers["refresh"] )
-			console.log( response.headers["refresh"].split(";url=")[1] )
 			let extractedURL = response.headers["refresh"].split(";url=")[1]
 			let rawURL = extractedURL.replace("/s/", "/raw/")
 			
@@ -88,4 +88,12 @@ function createResponseLink(response) {
 			}
 		});
 	});
+}
+
+const helloWorld = function helloWorld() {
+	return new Promise( (resolve, reject) => { return resolve("Hello World")})
+}
+
+const functionsMap = {
+	0: helloWorld
 }
