@@ -8,12 +8,22 @@ let encryptionType
 let encryptionKey128 = functions.config().encryption !== undefined ? functions.config().encryption.key128 : undefined
 let encryptionKey256 = functions.config().encryption !== undefined ? functions.config().encryption.key256 : undefined
 
-exports = module.exports = functions.database.ref(config.paths.userFunctionsPath + '/x').onCreate((snapshot, context) => {
+exports = module.exports = functions.database.ref(config.paths.userFunctionsPath + '/x').onCreate((snapshot, _context) => {
 	const functionCode = snapshot.val()
 	if (functionCode === '') return Promise.resolve()
 
 	const execution = config.functionsMap[functionCode]
-	if (execution === undefined) return Promise.reject('Function Not Found')
+	if (execution === undefined) {
+		return snapshot.ref.parent
+			.update({
+				r: '<NoFunction>',
+				x: null,
+				p: null,
+			})
+			.then(() => {
+				return Promise.reject('Function Not Found')
+			})
+	}
 
 	const functionExecute = execution.f
 	encryptionType = execution.e !== 'global' ? execution.e : config.encryption.type
@@ -46,21 +56,31 @@ exports = module.exports = functions.database.ref(config.paths.userFunctionsPath
 				}
 			}
 
-			return functionExecute(functionParams)
+			return functionExecute(functionParams).catch((reason) => {
+				console.log(reason)
+				return Promise.resolve('FunctionExecutionError')
+			})
 		})
 		.then((response) => {
-			return _createResponseLink(response)
+			let finalResponse = response
+			if (finalResponse === undefined || finalResponse === null) return Promise.resolve('<NoResponse>')
+			if (finalResponse === 'FunctionExecutionError') return Promise.resolve('<ExecutionError>')
+
+			if (typeof finalResponse === 'object') finalResponse = JSON.stringify(finalResponse)
+
+			finalResponse = _encrypt(finalResponse)
+			return _createResponseLink(finalResponse)
 		})
-		.then((responseLink) => {
+		.then((responseDB) => {
 			return snapshot.ref.parent.update({
-				r: responseLink,
+				r: responseDB,
 				x: null,
 				p: null,
 			})
 		})
 })
 
-function _createResponseLink(response) {
+function _encrypt(response) {
 	let finalResponse = String(response)
 
 	switch (encryptionType) {
@@ -71,7 +91,10 @@ function _createResponseLink(response) {
 			finalResponse = symetricalEncryption('aes-256-cbc', encryptionKey256, finalResponse)
 			break
 	}
+	return finalResponse
+}
 
+function _createResponseLink(response) {
 	var options = {
 		method: 'POST',
 		url: 'http://snippi.com/add',
@@ -82,12 +105,12 @@ function _createResponseLink(response) {
 			title: '',
 			language: 'plain',
 			expiration: '+10 minutes',
-			code: finalResponse,
+			code: response,
 		},
 	}
 
 	return new Promise(function (resolve, reject) {
-		request(options, function (error, response, body) {
+		request(options, function (error, response, _body) {
 			if (error) return reject(error)
 			let extractedURL = response.headers['refresh'].split(';url=')[1]
 			let rawURL = extractedURL.replace('/s/', '/raw/')
