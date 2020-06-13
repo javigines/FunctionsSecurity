@@ -4,8 +4,8 @@ const crypto = require('crypto')
 var request = require('request')
 const config = require('./configuration')
 
-const encryptionKey128 = functions.config().encryption.key128
-const encryptionKey256 = functions.config().encryption.key256
+let encryptionKey128 = functions.config().encryption !== undefined ? functions.config().encryption.key128 : undefined
+let encryptionKey256 = functions.config().encryption !== undefined ? functions.config().encryption.key256 : undefined
 
 exports = module.exports = functions.database.ref(config.paths.userFunctionsPath + '/x').onCreate((snapshot, context) => {
 	const functionCode = snapshot.val()
@@ -14,11 +14,33 @@ exports = module.exports = functions.database.ref(config.paths.userFunctionsPath
 	const functionExecute = config.functionsMap[functionCode]
 	if (functionExecute === undefined) return Promise.reject('Function Not Found')
 
-	return snapshot.ref.parent
-		.child('p')
-		.once('value')
-		.then((params) => {
-			const functionParams = params.val()
+	let promises = [snapshot.ref.parent.child('p').once('value')]
+
+	if (config.encryption.userPersonalized) {
+		switch (config.encryption.type) {
+			case 'aes128':
+				promises.push(snapshot.ref.parent.child('k128').once('value'))
+				break
+			case 'aes256':
+				promises.push(snapshot.ref.parent.child('k256').once('value'))
+				break
+		}
+	}
+
+	return Promise.all(promises)
+		.then((response) => {
+			const functionParams = response[0].val()
+
+			if (config.encryption.userPersonalized) {
+				switch (config.encryption.type) {
+					case 'aes128':
+						encryptionKey128 = response[1].val()
+						break
+					case 'aes256':
+						encryptionKey256 = response[1].val()
+						break
+				}
+			}
 
 			console.debug(functionCode)
 			console.debug(functionParams)
@@ -29,8 +51,10 @@ exports = module.exports = functions.database.ref(config.paths.userFunctionsPath
 			return _createResponseLink(response)
 		})
 		.then((responseLink) => {
-			return snapshot.ref.parent.set({
+			return snapshot.ref.parent.update({
 				r: responseLink,
+				x: null,
+				p: null
 			})
 		})
 })
