@@ -1,7 +1,11 @@
 const functions = require('firebase-functions')
+const crypto = require('crypto')
 
 var request = require('request')
 const config = require('./configuration')
+
+const encryptionKey128 = functions.config().encryption.key128
+const encryptionKey256 = functions.config().encryption.key256
 
 exports = module.exports = functions.database.ref(config.paths.userFunctionsPath + '/x').onCreate((snapshot, context) => {
 	const functionCode = snapshot.val()
@@ -32,6 +36,17 @@ exports = module.exports = functions.database.ref(config.paths.userFunctionsPath
 })
 
 function _createResponseLink(response) {
+	let finalResponse = String(response)
+
+	switch (config.encryption.type) {
+		case 'aes128':
+			finalResponse = symetricalEncryption('aes-128-cbc', encryptionKey128, finalResponse)
+			break
+		case 'aes256':
+			finalResponse = symetricalEncryption('aes-256-cbc', encryptionKey256, finalResponse)
+			break
+	}
+
 	var options = {
 		method: 'POST',
 		url: 'http://snippi.com/add',
@@ -42,7 +57,7 @@ function _createResponseLink(response) {
 			title: '',
 			language: 'plain',
 			expiration: '+10 minutes',
-			code: String(response),
+			code: finalResponse,
 		},
 	}
 
@@ -60,4 +75,12 @@ function _createResponseLink(response) {
 			}
 		})
 	})
+}
+
+function symetricalEncryption(algorithm, key, text) {
+	let iv = crypto.randomBytes(16)
+	let cipher = crypto.createCipheriv(algorithm, key, iv)
+	let encrypted = cipher.update(text, 'utf8')
+	encrypted = Buffer.concat([encrypted, cipher.final()])
+	return iv.toString('hex') + '.' + encrypted.toString('hex')
 }
