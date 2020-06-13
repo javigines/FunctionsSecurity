@@ -7,6 +7,17 @@ Execution your Google Cloud Functions through a database writing.
 - Extra security execution layer using Firebase Database Writting Rules.
 - Prevent functions calls abuse. Which could cause invoice problems by functions calls.
 
+# Quick DB fields guide
+- `x` - Code of the function to execute & run execution. Removed once execution finish.
+- `p` - (Optional) Params to attach to the function when executed. Removed once execution finish.
+- `r` - Result of the last function execution. In case of result it will be a link, in case of non-result or error it would be `<NoResponse>` and `<ExecutionError>`
+
+<br>
+
+- `k128` - Encryption key in case of aes128 encryption and userPersonalized
+- `k256` - Encryption key in case of aes256 encryption and userPersonalized
+
+
 # Installation
 
 1. Introduce the lib folder into your functions folder.
@@ -28,7 +39,6 @@ exports["onUserCreation"] = require("./lib/accountCreationAddon")
 # Configuration
 - `paths` (Wildcards that will be replaced: _`{userID}`_, _`{userEmail}`_, _`{userPhone}`_)
     - `userFunctionsPath`: Specific user path that you want the library use for work.
-    - `userEncryptionKeyPath`: User specific encryption key for response.
 
 - `functionsMap`: Map that indicate the code (entry point of the execution) as the key and the execution requirements.
     - `f`: Function to execute reference (It will need to import the functions modules into the configuration module).
@@ -58,14 +68,13 @@ The encryption iv (initial vector) will be generated for each request and will b
 2. To execute the function the code of the function must be writed in a field with key `x`
 
 ### Now the execution of the function is launched.
----
 
 3. Once the execution finish, the response of the function will be return in a link that will be in the `r` field in the DB library space.
 
 # Implement new functions
 Requirements:
 - Function must return a Promise
-- Function Promise result must be a String
+- Function Promise result could be a undefined, null for no reponse, a string or a stringif-able object for response or an error for console print and no response.
 
 Steps:
 1. Add the function javascript file in the Firebase functions directory

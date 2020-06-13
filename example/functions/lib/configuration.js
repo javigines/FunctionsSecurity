@@ -2,8 +2,7 @@ const f = require('../modules/helloWorld')
 
 module.exports = {
 	paths: {
-		userFunctionsPath: '/users/{userID}/functions/',
-		userEncryptionKeyPath: '/users/{userID}/functions/encryptionKey', // Only used on userPersonalized encryption
+		userFunctionsPath: '/users/{userID}/functions/'
 	},
 
 	functionsMap: {
