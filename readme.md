@@ -2,9 +2,11 @@
 Execution your Google Cloud Functions through a database writing.
 
 # Beneficies
-Extra security execution layer offered by Firebase Database Writting Rules.
+- Extra security execution layer using Firebase Database Writting Rules.
+- Prevent functions calls abuse. Which could cause invoice problems by functions calls.
 
 # Installation
+
 1. Introduce the lib folder into your functions folder.
 2. Configure the configuration file with your preferences.
 3. Include the following line in your index file:
@@ -20,17 +22,17 @@ exports["onUserCreation"] = require("./lib/accountCreationAddon")
 # Configuration
 - `paths` (Wildcards that will be replaced: _`{userID}`_, _`{userEmail}`_, _`{userPhone}`_)
     - `userFunctionsPath`: Specific user path that you want the library use for work.
-    - `userEncryptionKeyPath`: User specific encryption key for response .
+    - `userEncryptionKeyPath`: User specific encryption key for response.
 
 - `functionsMap`: Map that indicate the code (entry point of the execution) as the key and the execution requirements.
-    - `f`: Function to execute reference (It will need to import the functions modules into the configuration module)
-    - `e`: Type of encryption to apply in the function response
+    - `f`: Function to execute reference (It will need to import the functions modules into the configuration module).
+    - `e`: Type of encryption to apply in the function response.
 
 - `encryption`
     - `type`: Encryption type for response. Available types: `none`, `aes128`, `aes256`
-    - `userPersonalized`: 
+    - `userPersonalized`
         - In case this is marked as `false`. The key must be stored on enviroment on _`encryption.key128`_ or _`encryption.key256`_ as required.
-            ##### To save in enviroment use `firebase functions:config:set encryption.key128="THE ENCRYPTION KEY"` and deploy
+            ##### To save in enviroment use `firebase functions:config:set encryption.key128="THE ENCRYPTION KEY"` and deploy.
 
         - In case this is marked as `true`. The key will be read **IN EVERY FUNCTION CALL** (increased response times and reads from DB) from `userEncryptionKeyPath` in DB.
 
