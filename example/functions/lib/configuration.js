@@ -3,31 +3,31 @@ const f = require('../modules/helloWorld')
 module.exports = {
 	paths: {
 		userFunctionsPath: '/users/{userID}/functions/',
-		userEncryptionKeyPath: '/users/{userID}/functions/encryptionKey' // Only used on userPersonalized encryption
+		userEncryptionKeyPath: '/users/{userID}/functions/encryptionKey', // Only used on userPersonalized encryption
 	},
 
 	functionsMap: {
-		0: { 
+		0: {
 			f: f.helloWorld,
-			e: "global"
+			e: 'global',
 		},
-		1: { 
+		1: {
 			f: f.helloWorld,
-			e: "none"
+			e: 'none',
 		},
-		2: { 
+		2: {
 			f: f.helloWorld,
-			e: "aes128"
+			e: 'aes128',
 		},
-		3: { 
+		3: {
 			f: f.helloWorld,
-			e: "aes256"
+			e: 'aes256',
 		},
-		// 10000: { 
+		// 10000: {
 		// 	f: f.helloWorld,
 		// 	e: "global"
 		// },
-		// "hello": { 
+		// "hello": {
 		// 	f: f.helloWorld,
 		// 	e: "global"
 		// }
@@ -35,6 +35,6 @@ module.exports = {
 
 	encryption: {
 		type: 'aes256', // none, aes128, aes256
-		userPersonalized: false
-	}
+		userPersonalized: false,
+	},
 }

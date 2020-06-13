@@ -16,7 +16,7 @@ exports = module.exports = functions.database.ref(config.paths.userFunctionsPath
 	if (execution === undefined) return Promise.reject('Function Not Found')
 
 	const functionExecute = execution.f
-	encryptionType = execution.e !== "global" ? execution.e : config.encryption.type
+	encryptionType = execution.e !== 'global' ? execution.e : config.encryption.type
 
 	let promises = [snapshot.ref.parent.child('p').once('value')]
 
@@ -46,9 +46,6 @@ exports = module.exports = functions.database.ref(config.paths.userFunctionsPath
 				}
 			}
 
-			console.debug(functionCode)
-			console.debug(functionParams)
-
 			return functionExecute(functionParams)
 		})
 		.then((response) => {
@@ -58,7 +55,7 @@ exports = module.exports = functions.database.ref(config.paths.userFunctionsPath
 			return snapshot.ref.parent.update({
 				r: responseLink,
 				x: null,
-				p: null
+				p: null,
 			})
 		})
 })
