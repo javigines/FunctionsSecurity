@@ -13,7 +13,16 @@ exports = module.exports = functions.database.ref(config.paths.userFunctionsPath
 	if (functionCode === '') return Promise.resolve()
 
 	const execution = config.functionsMap[functionCode]
-	if (execution === undefined) return Promise.reject('Function Not Found')
+	if (execution === undefined) {
+		return snapshot.ref.parent.update({
+			r: "<NoFunction>",
+			x: null,
+			p: null,
+		})
+		.then(() => {
+			return Promise.reject('Function Not Found')
+		})
+	}
 
 	const functionExecute = execution.f
 	encryptionType = execution.e !== 'global' ? execution.e : config.encryption.type
@@ -61,9 +70,9 @@ exports = module.exports = functions.database.ref(config.paths.userFunctionsPath
 			finalResponse = _encrypt(finalResponse)
 			return _createResponseLink(finalResponse)
 		})
-		.then((responseLink) => {
+		.then((responseDB) => {
 			return snapshot.ref.parent.update({
-				r: responseLink,
+				r: responseDB,
 				x: null,
 				p: null,
 			})
