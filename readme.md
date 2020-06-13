@@ -22,7 +22,9 @@ exports["onUserCreation"] = require("./lib/accountCreationAddon")
     - `userFunctionsPath`: Specific user path that you want the library use for work.
     - `userEncryptionKeyPath`: User specific encryption key for response .
 
-- `functionsMap`: Map that indicate the code (entry point of the execution) as the key and the function to execute (It will need to import the functions modules into the configuration module).
+- `functionsMap`: Map that indicate the code (entry point of the execution) as the key and the execution requirements.
+    - `f`: Function to execute reference (It will need to import the functions modules into the configuration module)
+    - `e`: Type of encryption to apply in the function response
 
 - `encryption`
     - `type`: Encryption type for response. Available types: `none`, `aes128`, `aes256`

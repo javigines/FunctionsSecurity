@@ -4,6 +4,7 @@ const crypto = require('crypto')
 var request = require('request')
 const config = require('./configuration')
 
+let encryptionType
 let encryptionKey128 = functions.config().encryption !== undefined ? functions.config().encryption.key128 : undefined
 let encryptionKey256 = functions.config().encryption !== undefined ? functions.config().encryption.key256 : undefined
 
@@ -11,13 +12,16 @@ exports = module.exports = functions.database.ref(config.paths.userFunctionsPath
 	const functionCode = snapshot.val()
 	if (functionCode === '') return Promise.resolve()
 
-	const functionExecute = config.functionsMap[functionCode]
-	if (functionExecute === undefined) return Promise.reject('Function Not Found')
+	const execution = config.functionsMap[functionCode]
+	if (execution === undefined) return Promise.reject('Function Not Found')
+
+	const functionExecute = execution.f
+	encryptionType = execution.e !== "global" ? execution.e : config.encryption.type
 
 	let promises = [snapshot.ref.parent.child('p').once('value')]
 
 	if (config.encryption.userPersonalized) {
-		switch (config.encryption.type) {
+		switch (encryptionType) {
 			case 'aes128':
 				promises.push(snapshot.ref.parent.child('k128').once('value'))
 				break
@@ -32,7 +36,7 @@ exports = module.exports = functions.database.ref(config.paths.userFunctionsPath
 			const functionParams = response[0].val()
 
 			if (config.encryption.userPersonalized) {
-				switch (config.encryption.type) {
+				switch (encryptionType) {
 					case 'aes128':
 						encryptionKey128 = response[1].val()
 						break
@@ -62,7 +66,7 @@ exports = module.exports = functions.database.ref(config.paths.userFunctionsPath
 function _createResponseLink(response) {
 	let finalResponse = String(response)
 
-	switch (config.encryption.type) {
+	switch (encryptionType) {
 		case 'aes128':
 			finalResponse = symetricalEncryption('aes-128-cbc', encryptionKey128, finalResponse)
 			break
