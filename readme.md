@@ -52,3 +52,37 @@ The encryption iv (initial vector) will be generated for each request and will b
 ```
 {iv}.{responseText}
 ```
+
+# Usage
+1. (Optional) User must write any map of params necessary by the execution function into the library space in the DB in a field with key `p`
+2. To execute the function the code of the function must be writed in a field with key `x`
+
+### Now the execution of the function is launched.
+---
+
+3. Once the execution finish, the response of the function will be return in a link that will be in the `r` field in the DB library space.
+
+# Implement new functions
+Requirements:
+- Function must return a Promise
+- Function Promise result must be a String
+
+Steps:
+1. Add the function javascript file in the Firebase functions directory
+2. Add the funtion with the following format:
+```
+module.exports = {
+	yourFunctionName( paramsMap ) {
+		return new Promise((resolve, reject) => {
+
+            ///////////////
+            // Your code
+            ///////////////
+
+			return resolve('Result')
+		})
+	},
+}
+```
+3. Add the reference to this function in the configuration file into the functionsMap with the execution code and the encryption way of your preference
+4. Deploy the code into Firebase Functions
