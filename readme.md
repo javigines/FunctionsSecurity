@@ -11,12 +11,16 @@ Execution your Google Cloud Functions through a database writing.
 2. Configure the configuration file with your preferences.
 3. Include the following line in your index file:
 ```
+const admin = require('firebase-admin')
+admin.initializeApp()
+
 exports["castFunctions"] = require("./lib/functionExecution")
 ```
 4. (Optional) If you want on new user creation it appears with the functions configuration in your DB, include the following line in your index file:
 ```
 exports["onUserCreation"] = require("./lib/accountCreationAddon")
 ```
+5. Add `request` dependency on `package.json`
 
 
 # Configuration
