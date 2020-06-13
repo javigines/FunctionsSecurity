@@ -9,4 +9,9 @@ module.exports = {
 			return resolve({r: 'Hello World'})
 		})
 	},
+	functionWithParams(params) {
+		return new Promise((resolve, reject) => {
+			return resolve({...{r: 'Hello World'}, ...params})
+		})
+	},
 }

@@ -39,6 +39,10 @@ module.exports = {
 			f: f2.errorResponse,
 			e: 'global',
 		},
+		14: {
+			f: f1.functionWithParams,
+			e: 'global',
+		},
 		// 10000: {
 		// 	f: f.helloWorld,
 		// 	e: "global"
