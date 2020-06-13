@@ -1,12 +1,12 @@
 # Firebase Security Addon
-Execution your Google Cloud Functions through a database writing
+Execution your Google Cloud Functions through a database writing.
 
 # Beneficies
-Extra security execution layer offered by Firebase Database Writting Rules
+Extra security execution layer offered by Firebase Database Writting Rules.
 
 # Installation
-1. Introduce the lib folder into your functions folder
-2. Configure the configuration file with your preferences
+1. Introduce the lib folder into your functions folder.
+2. Configure the configuration file with your preferences.
 3. Include the following line in your index file:
 ```
 exports["castFunctions"] = require("./lib/functionExecution")
@@ -18,7 +18,27 @@ exports["onUserCreation"] = require("./lib/accountCreationAddon")
 
 
 # Configuration
-- `paths`
+- `paths` (Wildcards that will be replaced: _`{userID}`_, _`{userEmail}`_, _`{userPhone}`_)
     - `userFunctionsPath`: Specific user path that you want the library use for work.
+    - `userEncryptionKeyPath`: User specific encryption key for response .
 
-- `functionsMap`: Map that indicate the code (entry point of the execution) as the key and the function to execute (It will need to import the functions modules into the configuration module)
+- `functionsMap`: Map that indicate the code (entry point of the execution) as the key and the function to execute (It will need to import the functions modules into the configuration module).
+
+- `encryption`
+    - `type`: Encryption type for response. Available types: `none`, `aes128`, `aes256`
+    - `userPersonalized`: 
+        - In case this is marked as `false`. The key must be stored on enviroment on _`encryption.key128`_ or _`encryption.key256`_ as required.
+            ##### To save in enviroment use `firebase functions:config:set encryption.key128="THE ENCRYPTION KEY"` and deploy
+
+        - In case this is marked as `true`. The key will be read **IN EVERY FUNCTION CALL** (increased response times and reads from DB) from `userEncryptionKeyPath` in DB.
+
+# Encryption with AES
+Key need to be on set on _`encryption.key128`_ or _`encryption.key256`_ as required or in user space as _`k128`_ or _`k256`_ field.
+
+##### [Example key generator page](https://www.allkeysgenerator.com/Random/Security-Encryption-Key-Generator.aspx)
+
+The encryption iv (initial vector) will be generated for each request and will be attach in the text of the response in the following format: 
+
+```
+{iv}.{responseText}
+```
