@@ -1,4 +1,4 @@
-# Firebase Security Add-on
+# Firebase Functions Security Add-on
 Execution your Google Cloud Functions through a RTDB writing.
 
 [Add-on Video](https://youtu.be/QUoi1udKFrw)
