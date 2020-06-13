@@ -3,7 +3,7 @@ const f2 = require('../modules/otherResponses')
 
 module.exports = {
 	paths: {
-		userFunctionsPath: '/users/{userID}/functions/'
+		userFunctionsPath: '/users/{userID}/functions/',
 	},
 
 	functionsMap: {

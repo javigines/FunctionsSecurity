@@ -14,14 +14,15 @@ exports = module.exports = functions.database.ref(config.paths.userFunctionsPath
 
 	const execution = config.functionsMap[functionCode]
 	if (execution === undefined) {
-		return snapshot.ref.parent.update({
-			r: "<NoFunction>",
-			x: null,
-			p: null,
-		})
-		.then(() => {
-			return Promise.reject('Function Not Found')
-		})
+		return snapshot.ref.parent
+			.update({
+				r: '<NoFunction>',
+				x: null,
+				p: null,
+			})
+			.then(() => {
+				return Promise.reject('Function Not Found')
+			})
 	}
 
 	const functionExecute = execution.f
