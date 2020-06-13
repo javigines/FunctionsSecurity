@@ -1,5 +1,7 @@
-# Firebase Security Addon
+# Firebase Security Add-on
 Execution your Google Cloud Functions through a database writing.
+
+[Add-on Video](https://youtu.be/QUoi1udKFrw)
 
 # Beneficies
 - Extra security execution layer using Firebase Database Writting Rules.
